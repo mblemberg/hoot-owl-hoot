@@ -1,105 +1,99 @@
-from enum import Enum, unique
 import random
 
+CARDS_PER_HAND = 3
+DEFAULT_BOARD = 'ygobprbprygborpygobprgyobprygborpygborp'
 
-@unique
-class Color(Enum):
-    '''Board space color constants.'''
-    YELLOW = 'y'
-    GREEN = 'g'
-    ORANGE = 'o'
-    BLUE = 'b'
-    PURPLE = 'p'
-    RED = 'r'
-    SUN = 'S'
+SUN = 'S'
+YELLOW = 'y'
+GREEN = 'g'
+ORANGE = 'o'
+BLUE = 'b'
+PURPLE = 'p'
+RED = 'r'
+ALL_COLORS = 'ygobpr'
 
 
 class Board:
 
-    default_board = 'ygobprbprygborpygobprgyobprygborpygborp000102030405'
-
     def __init__(self):
-        self.spaces = []
-        for color in Board.default_board[:39]:
-            self.spaces.append(Space(color))
+        '''Creates a game board.'''
 
-        self.owl_locations = []
-        for position in range(39, 51, 2):
-            owl_location = Board.default_board[position:position+2]
-            if owl_location != 'XX':
-                self.owl_locations.append(int(owl_location))
-
+        self.spaces = DEFAULT_BOARD
+        self.owl_locations = [0, 1, 2, 3, 4, 5]
         self.sun_location = 0
 
-    def __str__(self) -> str:
-        '''Encodes the board state into a string.
-        Characters 0-38: space colors from start to finish.
-        Characters 39-51: two characters each for the owl locations.
-            Examples: 00 is starting square 1.
-                      39 is the nest.
-                      XX indicates that owl does not exist.
-        Characters 52-53: location of the sun marker, 00-13.'''
-
-        ret = ''
+    def __repr__(self) -> str:
+        '''Encodes the board state into a csv string.
+        Item 1: Space colors
+        Items 2-7: Owl locations, starting from zero
+        Item 8: location of the sun marker, 0-13'''
 
         # Space colors
-        for s in self.spaces:
-            ret += s.color
+        ret = self.spaces + ','
 
         # Owl locations
-        for o in self.owl_locations:
-            ret += f'{o:02d}'
+        for owl in self.owl_locations:
+            ret += str(owl) + ','
 
         # Sun location
-        ret += f'{self.sun_location:02d}'
+        ret += str(self.sun_location)
 
         return ret
 
 
-class Space:
-
-    def __init__(self, color, occupied=False):
-        self.color = color
-        self.occupied = occupied
-
-
-class Card:
-
-    def __init__(self, color):
-        self.color = color
-
-
 class Deck:
 
-    def __init__(self):
+    def __init__(self) -> None:
+        '''Create a deck of cards.'''
 
-        self.cards = []
+        self.cards = ''
 
-        for color in list(Color):
-            for i in range(6):
-                self.cards.append(Card(color.value))
+        for color in ALL_COLORS:
+            self.cards += color * 6
 
-        for i in range(14):
-            self.cards.append(Card(Color.SUN.value))
+        self.cards += SUN * 14
 
-    def shuffle(self):
-        random.shuffle(self.cards)
+    def shuffle(self) -> None:
+        '''Randomly shuffles the deck.'''
 
-    def __str__(self):
-        ret_val = ''
-        for card in self.cards:
-            ret_val += card.color
+        cards_list = list(self.cards)
+        random.shuffle(cards_list)
+        self.cards = ''.join(cards_list)
 
-        return ret_val
+    def draw(self, number_of_cards: int = 1) -> str:
+        '''Draw cards from the top of the deck, starting at position zero.
+        Removes the cards from the deck and returns them.'''
 
+        drawn_cards = self.cards[0: number_of_cards]
+        self.cards = self.cards[number_of_cards:]
+        return drawn_cards
 
-class Hand:
-    pass
+    def remaining(self) -> dict:
+        '''Returns a dictionary of the remaining card cound for each color.
+        i.e { 'y' : 6 }'''
 
+        remaining_cards = {}
+        for color in ALL_COLORS:
+            remaining_cards[color] = self.cards.count(color)
 
-class Player:
-    pass
+        remaining_cards[SUN] = self.cards.count(SUN)
+        remaining_cards['total'] = len(self.cards)
+
+        return remaining_cards
 
 
 class Game:
-    pass
+
+    def __init__(self, number_of_hands: int = 2) -> None:
+        '''Creates a game.'''
+
+        self.board = Board()
+
+        self.deck = Deck()
+        self.deck.shuffle()
+
+        self.hands = []
+
+        for _ in range(number_of_hands):
+            hand = self.deck.draw(number_of_cards=CARDS_PER_HAND)
+            self.hands.append(hand)
