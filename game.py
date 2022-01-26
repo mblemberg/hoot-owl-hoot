@@ -179,19 +179,22 @@ class Game:
         self.turn = (self.turn + 1) % self.number_of_hands
 
 
-g = Game()
-print(g)
-print(g.state())
-print(g.possible_moves())
+games_played = 0
+games_won = 0
+games_lost = 0
 
-won = False
-while not won:
-    g = Game()
-    print(g)
+while games_played < 1E6:
+    g = Game(number_of_hands=4)
     while g.state() == 'IN PROGRESS':
         possible_moves = g.possible_moves()
         move_index = random.randint(0, len(possible_moves)-1)
         g.move(g.possible_moves()[move_index])
-        print(g)
     if g.state() == 'WON':
-        won = True
+        games_won += 1
+    elif g.state() == 'LOST':
+        games_lost += 1
+    games_played += 1
+
+print(f'played = {games_played}')
+print(f'won = {games_won}')
+print(f'lost = {games_lost}')
