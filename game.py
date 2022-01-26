@@ -172,7 +172,7 @@ class Game:
             self.move_sun()
         else:
             self.move_owl(move[0], move[1])
-        
+
         self.hands[self.turn] = self.hands[self.turn].replace(move[0], '', 1)
         self.hands[self.turn] += self.deck.draw()
 
