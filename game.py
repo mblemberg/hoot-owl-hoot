@@ -1,4 +1,5 @@
 import random
+from typing import List
 
 CARDS_PER_HAND = 3
 DEFAULT_BOARD = 'ygobprbprygborpygobprgyobprygborpygborp'
@@ -20,24 +21,24 @@ class Board:
         '''Creates a game board.'''
 
         self.spaces = DEFAULT_BOARD
-        self.owl_locations = [0, 1, 2, 3, 4, 5]
-        self.sun_location = 0
+        self.owl_positions = [0, 1, 2, 3, 4, 5]
+        self.sun_position = 0
 
     def __repr__(self) -> str:
         '''Encodes the board state into a csv string.
         Item 1: Space colors
-        Items 2-7: Owl locations, starting from zero
-        Item 8: location of the sun marker, 0-13'''
+        Items 2-7: Owl positions, starting from zero
+        Item 8: position of the sun marker, 0-13'''
 
         # Space colors
         ret = self.spaces + ','
 
-        # Owl locations
-        for owl in self.owl_locations:
+        # Owl positions
+        for owl in self.owl_positions:
             ret += str(owl) + ','
 
-        # Sun location
-        ret += str(self.sun_location)
+        # Sun position
+        ret += str(self.sun_position)
 
         return ret
 
@@ -45,7 +46,7 @@ class Board:
         '''From the specified starting index, return the next empty space of the specified color.
         If none exist, the nest is returned, index 39.'''
         for index, space_color in enumerate(self.spaces[starting_index + 1:], starting_index + 1):
-            if space_color == card_color and index not in self.owl_locations:
+            if space_color == card_color and index not in self.owl_positions:
                 return index
         else:
             return NEST_INDEX
@@ -92,6 +93,17 @@ class Deck:
         return remaining_cards
 
 
+class Move:
+
+    def __init__(
+        self,
+        card_color: str,
+        owl_index: int = None
+    ):
+        self.card_color = card_color
+        self.owl_index = owl_index
+
+
 class Game:
 
     def __init__(self, number_of_hands: int = 2) -> None:
@@ -120,75 +132,120 @@ class Game:
 
         return ret_val
 
+    def __str__(self):
+        '''Returns a string representation of the game state.'''
+
+        ret_val = ''
+
+        for position in range(len(self.board.spaces)):
+            if position in self.board.owl_positions:
+                ret_val += '*'
+            else:
+                ret_val += ' '
+
+        ret_val += f' Sun: {self.board.sun_position}'
+
+        return ret_val
+
     def move_owl(self, color: str, owl_index: int) -> None:
         '''Moves the specified owl to the next empty space of the specified color.'''
 
-        owl_location = self.board.owl_locations[owl_index]
-        move_to_location = self.board.next_empty_space(owl_location, color)
-        self.board.owl_locations[owl_index] = move_to_location
+        owl_position = self.board.owl_positions[owl_index]
+        move_to_position = self.board.next_empty_space(owl_position, color)
+        self.board.owl_positions[owl_index] = move_to_position
 
     def move_sun(self):
         '''Moves the sun forward one position.'''
 
-        self.board.sun_location += 1
+        self.board.sun_position += 1
 
     def state(self) -> str:
         '''Returns "WON", "LOST", or "IN PROGRESS".'''
 
-        if self.board.sun_location == 13:
+        if self.board.sun_position == 13:
             return 'LOST'
-        elif self.board.owl_locations.count(NEST_INDEX) == 6:
+        elif self.board.owl_positions.count(NEST_INDEX) == 6:
             return 'WON'
         else:
             return 'IN PROGRESS'
 
-    def possible_moves(self) -> list:
-        '''Returns a list of possible moves.  Each move is represented as a list of two elements;
-        First, the color of the card as a single character.
-        Second, the index of the owl to be moved.  If a sun card is played,
-        the index of the owl can be ignored, but it will be set to 0.'''
+    def possible_moves(self) -> List[Move]:
+        '''Returns a list of possible moves.'''
 
         moves = []
 
         # If the hand contains a sun card, it must be played.
         if SUN in self.hands[self.turn]:
-            moves.append([SUN, 0])
+            moves.append(Move(SUN))
             return moves
 
         for card in self.hands[self.turn]:
-            for owl_index, owl_location in enumerate(self.board.owl_locations):
-                if owl_location != NEST_INDEX:
-                    moves.append([card, owl_index])
+            for owl_index, owl_position in enumerate(self.board.owl_positions):
+                if owl_position != NEST_INDEX:
+                    moves.append(Move(card, owl_index=owl_index))
 
         return moves
 
-    def move(self, move: list) -> None:
-        '''Makes a move.  Each move is represented as a list of two elements;
-        First, the color of the card as a single character.
-        Second, the index of the owl to be moved.  If a sun card is played,
-        the index of the owl can be ignored, but it will be set to 0.'''
+    def move(self, move: Move) -> None:
+        '''Makes a move.'''
 
-        if move[0] == 'S':
+        if move.card_color == SUN:
             self.move_sun()
         else:
-            self.move_owl(move[0], move[1])
+            self.move_owl(move.card_color, move.owl_index)
 
-        self.hands[self.turn] = self.hands[self.turn].replace(move[0], '', 1)
+        self.hands[self.turn] = self.hands[self.turn].replace(
+            move.card_color, '', 1)
         self.hands[self.turn] += self.deck.draw()
 
         self.turn = (self.turn + 1) % self.number_of_hands
+
+
+class Agent:
+    '''Plays the game for all players.'''
+
+    def __init__(self, game: Game) -> None:
+        self.game = game
+
+    def make_random_move(self):
+        '''Makes a random move from the list of all possible moves.'''
+
+        possible_moves = self.game.possible_moves()
+        move_index = random.randint(0, len(possible_moves) - 1)
+        self.game.move(possible_moves[move_index])
+
+    def move_last_owl_randomly(self) -> None:
+        '''If legal, moves the owl that is furthest from the nest with a random card from the hand.'''
+
+        possible_moves = self.game.possible_moves()
+
+        if len(possible_moves) == 1:
+            self.game.move(possible_moves[0])
+            return
+
+        else:
+            last_owl_position = min(self.game.board.owl_positions)
+            last_owl_index = self.game.board.owl_positions.index(
+                last_owl_position)
+
+            random.shuffle(possible_moves)
+            for move in possible_moves:
+                if move.owl_index == last_owl_index:
+                    self.game.move(move)
+                    return
 
 
 games_played = 0
 games_won = 0
 games_lost = 0
 
-while games_played < 1E6:
+while games_played < 1000:
     g = Game(number_of_hands=4)
+    a = Agent(g)
+    print(g)
     while g.state() == 'IN PROGRESS':
-        possible_moves = g.possible_moves()
-        move_index = random.randint(0, len(possible_moves)-1)
-        g.move(g.possible_moves()[move_index])
+        a.move_last_owl_randomly()
+        print(g)
     if g.state() == 'WON':
         games_won += 1
     elif g.state() == 'LOST':
