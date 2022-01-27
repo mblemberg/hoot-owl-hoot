@@ -214,7 +214,7 @@ class Agent:
 
     def __init__(
         self,
-        game: Game,
+        game: Game = Game(),
         description: str = None
     ) -> None:
         self.game = game
