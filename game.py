@@ -3,7 +3,7 @@ from typing import List
 
 CARDS_PER_HAND = 3
 DEFAULT_BOARD = 'ygobprbprygborpygobprgyobprygborpygborp'
-NEST_INDEX = 39
+NEST_INDEX = len(DEFAULT_BOARD)
 
 SUN = 'S'
 YELLOW = 'y'
@@ -44,12 +44,19 @@ class Board:
 
     def next_empty_space(self, starting_index: int, card_color: str) -> int:
         '''From the specified starting index, return the next empty space of the specified color.
-        If none exist, the nest is returned, index 39.'''
+        If none exist, the nest is returned, index NEST_INDEX.'''
         for index, space_color in enumerate(self.spaces[starting_index + 1:], starting_index + 1):
             if space_color == card_color and index not in self.owl_positions:
                 return index
         else:
             return NEST_INDEX
+
+    def sort_owls(self) -> None:
+        '''Sort the owls in order from closest to furthest from the nest.
+        index 0 is the owl furthest from the nest.
+        index 5 is the owl closest to the nest.'''
+
+        self.owl_positions.sort()
 
 
 class Deck:
@@ -153,6 +160,7 @@ class Game:
         owl_position = self.board.owl_positions[owl_index]
         move_to_position = self.board.next_empty_space(owl_position, color)
         self.board.owl_positions[owl_index] = move_to_position
+        self.board.sort_owls()
 
     def move_sun(self):
         '''Moves the sun forward one position.'''
@@ -204,8 +212,13 @@ class Game:
 class Agent:
     '''Plays the game for all players.'''
 
-    def __init__(self, game: Game) -> None:
+    def __init__(
+        self,
+        game: Game,
+        description: str = None
+    ) -> None:
         self.game = game
+        self.description = description
 
     def make_random_move(self):
         '''Makes a random move from the list of all possible moves.'''
@@ -214,8 +227,13 @@ class Agent:
         move_index = random.randint(0, len(possible_moves) - 1)
         self.game.move(possible_moves[move_index])
 
-    def move_last_owl_randomly(self) -> None:
-        '''If legal, moves the owl that is furthest from the nest with a random card from the hand.'''
+    def move_nth_owl_randomly(self, n: int) -> None:
+        '''If legal, moves the nth owl with a random card from the hand.
+        n = 0 means the owl furthest from the nest.
+        n = 5 means the owl closest to the nest.
+
+        If the specified owl is already in the nest, move the owl
+        closest to the nest with a random card from the hand instaed.'''
 
         possible_moves = self.game.possible_moves()
 
@@ -224,15 +242,12 @@ class Agent:
             return
 
         else:
-            last_owl_position = min(self.game.board.owl_positions)
-            last_owl_index = self.game.board.owl_positions.index(
-                last_owl_position)
-
-            random.shuffle(possible_moves)
-            for move in possible_moves:
-                if move.owl_index == last_owl_index:
-                    self.game.move(move)
-                    return
+            for owl in range(n, -1, -1):
+                random.shuffle(possible_moves)
+                for move in possible_moves:
+                    if move.owl_index == owl:
+                        self.game.move(move)
+                        return
 
 
 games_played = 0
@@ -244,7 +259,7 @@ while games_played < 1000:
     a = Agent(g)
     print(g)
     while g.state() == 'IN PROGRESS':
-        a.move_last_owl_randomly()
+        a.move_nth_owl_randomly(0)
         print(g)
     if g.state() == 'WON':
         games_won += 1
