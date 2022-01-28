@@ -40,7 +40,7 @@ class Agent:
         if show_game:
             print(f'Game result: {self.game.state()}')
 
-        return self.game.state() == 'WIN'
+        return self.game.state() == Game.WIN
 
     def play_n_games(self, n: int) -> dict:
         '''Play the specified number of games.  Return statistics.'''

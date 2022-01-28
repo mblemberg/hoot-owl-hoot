@@ -113,6 +113,10 @@ class Move:
 
 class Game:
 
+    WIN = 0
+    LOSS = 1
+    IN_PROGRESS = 2
+
     def __init__(self, number_of_hands: int = 2) -> None:
         '''Creates a game.'''
 
@@ -171,11 +175,11 @@ class Game:
         '''Returns "WON", "LOST", or "IN PROGRESS".'''
 
         if self.board.sun_position == 13:
-            return 'LOST'
+            return Game.LOSS
         elif self.board.owl_positions.count(NEST_INDEX) == 6:
-            return 'WON'
+            return Game.WIN
         else:
-            return 'IN PROGRESS'
+            return Game.IN_PROGRESS
 
     def possible_moves(self) -> List[Move]:
         '''Returns a list of possible moves.'''
