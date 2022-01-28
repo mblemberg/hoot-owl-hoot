@@ -113,9 +113,9 @@ class Move:
 
 class Game:
 
-    WIN = 0
-    LOSS = 1
-    IN_PROGRESS = 2
+    WIN = 'Win'
+    LOSS = 'Loss'
+    IN_PROGRESS = 'In Progress'
 
     def __init__(self, number_of_hands: int = 2) -> None:
         '''Creates a game.'''

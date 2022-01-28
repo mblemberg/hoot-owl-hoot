@@ -32,7 +32,8 @@ class Agent:
             print(self.game.board.spaces)
             print(self.game)
 
-        while self.game.state() == 'IN PROGRESS':
+        while self.game.state() == Game.IN_PROGRESS:
+
             self.move()
             if show_game:
                 print(self.game)
