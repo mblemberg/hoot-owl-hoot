@@ -9,6 +9,7 @@ class Agent:
         n_hands: int = 2,
         description: str = None
     ) -> None:
+        self.n_hands = n_hands
         self.game = Game(number_of_hands=n_hands)
         self.description = description
 
@@ -52,6 +53,7 @@ class Agent:
         }
 
         for _ in range(n):
+            self.game = Game(number_of_hands=self.n_hands)
             result = self.play_game()
             if result:
                 stats['wins'] += 1
