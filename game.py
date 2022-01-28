@@ -154,7 +154,14 @@ class Game:
             else:
                 ret_val += ' '
 
-        ret_val += f' Sun: {self.board.sun_position}'
+        ret_val += '|'
+
+        for hand in self.hands:
+            ret_val += ' ' + hand
+
+        ret_val += f' | Sun: {self.board.sun_position}'
+
+
 
         return ret_val
 
