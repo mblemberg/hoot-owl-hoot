@@ -2,7 +2,7 @@ import random
 from typing import List
 
 CARDS_PER_HAND = 3
-DEFAULT_BOARD = 'ygobprbprygborpygobprgyobprygborpygborp'
+DEFAULT_BOARD = 'ygobprbprygborpygobprgyobprygborpygborpN'
 NEST_INDEX = len(DEFAULT_BOARD)
 
 SUN = 'S'
