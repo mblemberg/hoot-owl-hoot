@@ -64,12 +64,7 @@ class Deck:
     def __init__(self) -> None:
         '''Create a deck of cards.'''
 
-        self.cards = ''
-
-        for color in ALL_COLORS:
-            self.cards += color * 6
-
-        self.cards += SUN * 14
+        self.cards = 'yyyyyyggggggoooooobbbbbbpppppprrrrrrSSSSSSSSSSSSSS'
 
     def shuffle(self) -> None:
         '''Randomly shuffles the deck.'''
