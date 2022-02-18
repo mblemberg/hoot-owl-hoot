@@ -94,6 +94,17 @@ class Deck:
 
         return remaining_cards
 
+    def position_of_nth_card(self, card_color: str, n: int):
+        """Returns the position within the deck of the nth card of the specified
+        color, starting from the zeroth index."""
+
+        count = 0
+        for k, color in enumerate(self.cards):
+            if color == card_color:
+                count += 1
+                if count == n:
+                    return k
+
 
 class Move:
 
@@ -155,8 +166,6 @@ class Game:
             ret_val += ' ' + hand
 
         ret_val += f' | Sun: {self.board.sun_position}'
-
-
 
         return ret_val
 
