@@ -167,6 +167,8 @@ class Game:
 
         ret_val += f' | Sun: {self.board.sun_position}'
 
+        ret_val += f' | Cards played: {50-len(self.deck.cards)-3}'
+
         return ret_val
 
     def move_owl(self, color: str, owl_index: int) -> None:
@@ -219,6 +221,8 @@ class Game:
 
         self.hands[self.turn] = self.hands[self.turn].replace(
             move.card_color, '', 1)
-        self.hands[self.turn] += self.deck.draw()
+
+        if self.state() == Game.IN_PROGRESS:
+            self.hands[self.turn] += self.deck.draw()
 
         self.turn = (self.turn + 1) % self.number_of_hands
