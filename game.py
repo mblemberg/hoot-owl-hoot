@@ -167,7 +167,10 @@ class Game:
 
         ret_val += f' | Sun: {self.board.sun_position}'
 
-        ret_val += f' | Cards played: {50-len(self.deck.cards)-3}'
+        number_of_cards_in_hands = 0
+        for h in self.hands:
+            number_of_cards_in_hands += len(h)
+        ret_val += f' | Cards played: {50-len(self.deck.cards)-number_of_cards_in_hands}'
 
         return ret_val
 
@@ -222,7 +225,7 @@ class Game:
         self.hands[self.turn] = self.hands[self.turn].replace(
             move.card_color, '', 1)
 
-        if self.state() == Game.IN_PROGRESS:
+        if self.state() == Game.IN_PROGRESS and self.deck.cards != '':
             self.hands[self.turn] += self.deck.draw()
 
         self.turn = (self.turn + 1) % self.number_of_hands
