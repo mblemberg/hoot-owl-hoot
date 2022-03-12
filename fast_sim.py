@@ -70,8 +70,9 @@ def avg_cards(n_hands: int = 4, n_games: int = 1000) -> Tuple[float]:
     return (removed_sum / n_games, played_sum / n_games)
 
 
-def main() -> None:
-    """Runs code for this module."""
+def simulate_games():
+    """Simulate a million games and print the average number of cards
+    removed from the deck and the average number of cards played."""
 
     n_games: int = int(1E6)
     print(f"Simulating {n_games:,} games per configuration.")
@@ -83,6 +84,11 @@ def main() -> None:
             f"avg_cards_removed: {results[0]:.4f}\t "
             f"avg_cards_played: {results[1]:.4f}"
         )
+
+
+def main() -> None:
+    """Runs code for this module."""
+    simulate_games()
 
 
 if __name__ == "__main__":
