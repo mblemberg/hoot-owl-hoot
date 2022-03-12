@@ -7,7 +7,7 @@ def play_game(n_hands: int = 4) -> Tuple[int]:
     Simulates a lost game and returns the number of cards removed from the
     deck and the number of cards played.
 
-    return value = [cards_removed, cards_played]
+    return value = (cards_removed, cards_played)
     """
 
     """
@@ -57,7 +57,7 @@ def avg_cards(n_hands: int = 4, n_games: int = 1000) -> Tuple[float]:
     Simulates n_games games with n_hands hands and returns the average number
     of cards removed from the deck and the average number of cards played.
 
-    return value = [avg_removed, avg_played]
+    return value = (avg_removed, avg_played)
     """
 
     removed_sum: int = 0
