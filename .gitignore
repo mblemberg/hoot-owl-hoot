@@ -8,3 +8,4 @@ tex/*.fls
 tex/*.log
 tex/*.synctex.gz
 tex/*.pdf
+tex/*.out
